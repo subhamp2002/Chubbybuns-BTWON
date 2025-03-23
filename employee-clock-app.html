@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chubby Buns - Employee Clock System</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #ff6b35;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 10px;
+        }
+        .app-container {
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #e55a2b;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .hidden {
+            display: none;
+        }
+        .clock-status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .logout-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .logout-button {
+            background-color: #6c757d;
+            width: auto;
+        }
+        .location-status {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #6c757d;
+        }
+        .history-container {
+            margin-top: 30px;
+        }
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <!-- Using base64 encoded image to work within the HTML file -->
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAAsTAAALEwEAmpwYAAABPklEQVR4nK2UzUrDQBDHZzaPIB5EL4IPIB7EkxZEfBbfwmcQb/oEPoD1ZPHkRUQkeDNgvImIiEh60YIPISId2d1Op9NDaCBks5nfzP5nN5MVWpQ2YDu0IbSKGJYKw5Wj0DQ+FyoMfR18F1S0KGh7G18DTTN+HlbPVXbKJhvMnpb8XsDTHSLVP+ZW5/dj7I1w+fTQbKx9gVYdADXXLzuL+Fhh9pjA3AhA6e7v/2Qn9UD/ICLCvB3HbnGS4P0Mv/cpiowUAqQoMrxd+cXDvSYUYGXwuvvmFw8NGRnP1CuNOirzwz9YNqcBhEMaQGEwx+uxQYV/Wa3D5OzwPqbDt6sUSI+F5JYXvpbxdp0ESUcmn55FP2vTfXIdM39MMd4c5tbkHsAkIZtUvzBTCABytcmhSYVUY83BIogG0Q/oL9HxuXlJlQAAAABJRU5ErkJggg==" alt="Chubby Buns Logo" class="logo">
+            <h1>Chubby Buns</h1>
+            <p>Employee Clock System</p>
+        </header>
+        
+        <div class="app-container">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="email">Employee Email:</label>
+                    <input type="email" id="email" placeholder="Enter your work email">
+                </div>
+                <button id="loginButton">Login</button>
+                <div id="loginStatus" class="status hidden"></div>
+            </div>
+            
+            <!-- Clock Interface (Hidden until login) -->
+            <div id="clockInterface" class="hidden">
+                <h2 id="welcomeMessage">Welcome!</h2>
+                
+                <div class="location-status" id="locationStatus">Checking your location...</div>
+                
+                <div class="clock-status">
+                    <p>Current Status: <span id="currentStatus">Not Clocked In</span></p>
+                    <p id="clockTime"></p>
+                </div>
+                
+                <button id="clockButton">Manual Clock In/Out</button>
+                <div id="clockStatus" class="status hidden"></div>
+                
+                <div class="history-container">
+                    <h3>Recent Activity</h3>
+                    <div id="activityHistory"></div>
+                </div>
+                
+                <div class="logout-container">
+                    <button id="logoutButton" class="logout-button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - CHANGE THESE VALUES
+        const RESTAURANT_LOCATION = {
+            latitude: -33.7687, // Example coordinates for Blacktown area - REPLACE WITH ACTUAL COORDINATES
+            longitude: 150.9082, // Example coordinates for Blacktown area - REPLACE WITH ACTUAL COORDINATES
+            radius: 100 // Range in meters (employees within this range will auto clock in/out)
+        };
+        
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const clockInterface = document.getElementById('clockInterface');
+        const emailInput = document.getElementById('email');
+        const loginButton = document.getElementById('loginButton');
+        const loginStatus = document.getElementById('loginStatus');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const locationStatus = document.getElementById('locationStatus');
+        const currentStatus = document.getElementById('currentStatus');
+        const clockTime = document.getElementById('clockTime');
+        const clockButton = document.getElementById('clockButton');
+        const clockStatus = document.getElementById('clockStatus');
+        const logoutButton = document.getElementById('logoutButton');
+        const activityHistory = document.getElementById('activityHistory');
+        
+        // Simple user database (In a real app, this would be server-side)
+        const users = [
+            { email: 'employee1@chubbybuns.com', name: 'Employee One', isClocked: false, history: [] },
+            { email: 'employee2@chubbybuns.com', name: 'Employee Two', isClocked: false, history: [] },
+            { email: 'manager@chubbybuns.com', name: 'Manager', isClocked: false, history: [] }
+        ];
+        
+        let currentUser = null;
+        let watchId = null;
+        
+        // Login function
+        loginButton.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                showStatus(loginStatus, 'Please enter your email', 'error');
+                return;
+            }
+            
+            const user = users.find(u => u.email === email);
+            
+            if (user) {
+                currentUser = user;
+                showStatus(loginStatus, 'Login successful!', 'success');
+                
+                // Switch to clock interface
+                setTimeout(() => {
+                    loginForm.classList.add('hidden');
+                    clockInterface.classList.remove('hidden');
+                    welcomeMessage.textContent = `Welcome, ${user.name}!`;
+                    updateClockStatus();
+                    startLocationTracking();
+                }, 1000);
+            } else {
+                showStatus(loginStatus, 'Email not found in our records', 'error');
+            }
+        });
+        
+        // Logout function
+        logoutButton.addEventListener('click', () => {
+            stopLocationTracking();
+            currentUser = null;
+            loginForm.classList.remove('hidden');
+            clockInterface.classList.add('hidden');
+            emailInput.value = '';
+            loginStatus.classList.add('hidden');
+        });
+        
+        // Manual clock in/out button
+        clockButton.addEventListener('click', () => {
+            toggleClockStatus();
+        });
+        
+        // Toggle clock status
+        function toggleClockStatus() {
+            if (!currentUser) return;
+            
+            currentUser.isClocked = !currentUser.isClocked;
+            const timestamp = new Date();
+            const action = currentUser.isClocked ? 'Clocked In' : 'Clocked Out';
+            
+            // Add to history
+            currentUser.history.unshift({
+                action: action,
+                time: timestamp,
+                method: 'Manual'
+            });
+            
+            updateClockStatus();
+            showStatus(clockStatus, `You have ${action.toLowerCase()} at ${formatTime(timestamp)}`, 'success');
+            updateActivityHistory();
+        }
+        
+        // Auto clock in/out based on location
+        function autoClockInOut(position, isInRange) {
+            if (!currentUser) return;
+            
+            const timestamp = new Date();
+            
+            // Only change status if current status doesn't match location
+            if (isInRange && !currentUser.isClocked) {
+                currentUser.isClocked = true;
+                currentUser.history.unshift({
+                    action: 'Clocked In',
+                    time: timestamp,
+                    method: 'Automatic (Location)'
+                });
+                showStatus(clockStatus, `You have automatically clocked in at ${formatTime(timestamp)}`, 'success');
+            } else if (!isInRange && currentUser.isClocked) {
+                currentUser.isClocked = false;
+                currentUser.history.unshift({
+                    action: 'Clocked Out',
+                    time: timestamp,
+                    method: 'Automatic (Location)'
+                });
+                showStatus(clockStatus, `You have automatically clocked out at ${formatTime(timestamp)}`, 'success');
+            }
+            
+            updateClockStatus();
+            updateActivityHistory();
+        }
+        
+        // Update the clock status display
+        function updateClockStatus() {
+            if (!currentUser) return;
+            
+            if (currentUser.isClocked) {
+                currentStatus.textContent = 'Clocked In';
+                clockButton.textContent = 'Clock Out';
+                
+                // Get the most recent clock in time
+                const clockInEntry = currentUser.history.find(entry => entry.action === 'Clocked In');
+                if (clockInEntry) {
+                    clockTime.textContent = `Since: ${formatTime(clockInEntry.time)}`;
+                }
+            } else {
+                currentStatus.textContent = 'Not Clocked In';
+                clockButton.textContent = 'Clock In';
+                clockTime.textContent = '';
+            }
+        }
+        
+        // Update activity history display
+        function updateActivityHistory() {
+            if (!currentUser) return;
+            
+            activityHistory.innerHTML = '';
+            
+            // Show most recent 5 entries
+            const recentHistory = currentUser.history.slice(0, 5);
+            
+            if (recentHistory.length === 0) {
+                activityHistory.innerHTML = '<p>No recent activity</p>';
+                return;
+            }
+            
+            recentHistory.forEach(entry => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <p><strong>${entry.action}</strong> at ${formatTime(entry.time)}</p>
+                    <p>Method: ${entry.method}</p>
+                `;
+                activityHistory.appendChild(historyItem);
+            });
+        }
+        
+        // Location tracking functions
+        function startLocationTracking() {
+            if (!navigator.geolocation) {
+                locationStatus.textContent = 'Geolocation is not supported by your browser';
+                return;
+            }
+            
+            locationStatus.textContent = 'Tracking your location...';
+            
+            watchId = navigator.geolocation.watchPosition(
+                position => checkLocation(position),
+                error => {
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            locationStatus.textContent = 'Location permission denied. Auto clock in/out disabled.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            locationStatus.textContent = 'Location information unavailable. Auto clock in/out disabled.';
+                            break;
+                        case error.TIMEOUT:
+                            locationStatus.textContent = 'Location request timed out. Auto clock in/out disabled.';
+                            break;
+                        default:
+                            locationStatus.textContent = 'Unknown error occurred with location. Auto clock in/out disabled.';
+                            break;
+                    }
+                },
+                { enableHighAccuracy: true, maximumAge: 30000, timeout: 27000 }
+            );
+        }
+        
+        function stopLocationTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+        }
+        
+        function checkLocation(position) {
+            const distance = calculateDistance(
+                position.coords.latitude,
+                position.coords.longitude,
+                RESTAURANT_LOCATION.latitude,
+                RESTAURANT_LOCATION.longitude
+            );
+            
+            const isInRange = distance <= RESTAURANT_LOCATION.radius;
+            
+            if (isInRange) {
+                locationStatus.textContent = 'You are at Chubby Buns Blacktown';
+            } else {
+                locationStatus.textContent = 'You are not at the restaurant';
+            }
+            
+            autoClockInOut(position, isInRange);
+        }
+        
+        // Calculate distance between two points using Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            
+            return distance; // in meters
+        }
+        
+        // Helper functions
+        function formatTime(date) {
+            return new Date(date).toLocaleString();
+        }
+        
+        function showStatus(element, message, type) {
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.classList.remove('hidden');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                element.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
